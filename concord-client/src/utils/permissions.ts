@@ -1,4 +1,4 @@
-import { User, Role } from "@/types/database";
+import { User } from "@/types/database";
 
 export type UserPermission =
   | "view_instance"

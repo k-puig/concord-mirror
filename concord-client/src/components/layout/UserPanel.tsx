@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Settings, Mic, MicOff, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

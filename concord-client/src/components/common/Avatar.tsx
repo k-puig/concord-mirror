@@ -60,7 +60,7 @@ const Avatar: React.FC<AvatarProps> = ({
     }
   };
 
-  const getUserInitials = (username: string, nickname?: string) => {
+  const getUserInitials = (username: string, nickname: string | null) => {
     const name = nickname || username;
     return name
       .split(" ")
@@ -116,7 +116,7 @@ const Avatar: React.FC<AvatarProps> = ({
             size === "xl" && "text-lg",
           )}
         >
-          {getUserInitials(user.username, user.nickname)}
+          {getUserInitials(user.username, user.nickname ? user.nickname : null)}
         </AvatarFallback>
       </ShadcnAvatar>
 

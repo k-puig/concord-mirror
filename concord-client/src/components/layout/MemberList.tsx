@@ -1,5 +1,4 @@
-// src/components/layout/MemberList.tsx - Enhanced with role management
-import React, { useState } from "react";
+import React from "react";
 import { useParams } from "react-router";
 import { Crown, Shield, UserIcon } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,6 +27,7 @@ interface MemberItemProps {
   member: User;
   instanceId: string;
   isOwner?: boolean;
+  currentUserRole: "member" | "mod" | "admin";
 }
 
 // Get the user's role for this specific instance
@@ -155,7 +155,7 @@ const MemberList: React.FC = () => {
       if (!acc[roleInfo.name]) {
         acc[roleInfo.name] = [];
       }
-      acc[roleInfo.name].push(member);
+      acc[roleInfo.name].push(member as User);
       return acc;
     },
     {} as Record<string, User[]>,

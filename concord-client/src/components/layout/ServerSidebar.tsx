@@ -13,7 +13,6 @@ import { useUiStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import ServerIcon from "@/components/server/ServerIcon";
 import { getAccessibleInstances, isGlobalAdmin } from "@/utils/permissions";
-import { CreateServerModal } from "../modals/CreateServerModal";
 
 const ServerSidebar: React.FC = () => {
   const navigate = useNavigate();

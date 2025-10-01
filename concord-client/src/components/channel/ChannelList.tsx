@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate, useParams } from "react-router";
 import { ChevronDown, ChevronRight, Plus, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +9,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CategoryWithChannels } from "@/types/api";
-import { Channel } from "@/types/database";
 import ChannelItem from "@/components/channel/ChannelItem";
 
 interface CategoryHeaderProps {

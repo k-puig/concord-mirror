@@ -1,6 +1,3 @@
-import { BackendUser } from "@/lib/api-client";
-import { Message } from "./database";
-
 // API types
 export type {
   ApiResponse,
@@ -38,9 +35,4 @@ export interface User {
     instanceId: string;
     role: string;
   }>;
-}
-
-// Message with user for chat components
-export interface MessageWithUser extends Message {
-  user?: User | BackendUser;
 }
