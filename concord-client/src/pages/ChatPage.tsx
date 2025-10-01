@@ -558,9 +558,8 @@ const ChatPage: React.FC = () => {
       </div>
     );
   } else if (!channelId || !currentChannel) {
-    const existingChannelId = categories
-      ?.flatMap((cat) => cat.channels)
-      ?.find((channel) => channel.position === 0)?.id;
+    const existingChannelId = categories?.flatMap((cat) => cat.channels)?.[0]
+      ?.id; // Get the first channel from the flattened list
 
     if (existingChannelId) {
       navigate(`/channels/${instanceId}/${existingChannelId}`);

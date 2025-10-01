@@ -65,7 +65,7 @@ function App(props: { socket: Socket }) {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider defaultTheme="system" storageKey="discord-theme">
+        <ThemeProvider defaultTheme="system" storageKey="concord-theme">
           <Router>
             <div className="h-screen w-screen overflow-hidden bg-background text-foreground">
               <Routes>
