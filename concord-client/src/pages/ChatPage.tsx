@@ -187,7 +187,7 @@ const MessageComponent: React.FC<MessageProps> = ({
             <div className="text-concord-primary leading-relaxed prose prose-sm max-w-none dark:prose-invert">
               <ReactMarkdown
                 components={{
-                  code: ({ node, className, children, ...props }) => {
+                  code: ({ className, children }) => {
                     const match = /language-(\w+)/.exec(className || "");
                     return match ? (
                       <div className="flex flex-row flex-1 max-w-2/3 flex-wrap !bg-transparent">

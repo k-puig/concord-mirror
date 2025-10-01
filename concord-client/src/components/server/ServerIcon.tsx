@@ -96,7 +96,7 @@ export const CreateServerModal: React.FC = () => {
         {
           name: name.trim(),
           icon: icon.trim() || undefined,
-          description: description.trim() || undefined,
+          // description: description.trim() || undefined,
         },
         {
           onSuccess: () => {

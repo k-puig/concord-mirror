@@ -5,7 +5,6 @@ import {
   User,
   Shield,
   Mic,
-  Eye,
   Settings,
   ChevronRight,
   Moon,
