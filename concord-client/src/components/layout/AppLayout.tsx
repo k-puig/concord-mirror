@@ -34,7 +34,7 @@ const AppLayout: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-concord-primary text-concord-primary">
+    <div className="flex h-screen overflow-y-auto bg-concord-primary text-concord-primary">
       {/* This component handles playing audio from remote users */}
       <VoiceConnectionManager />
 

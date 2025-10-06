@@ -1,419 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
-import ReactMarkdown from "react-markdown";
-import {
-  Hash,
-  Volume2,
-  Users,
-  Pin,
-  MoreHorizontal,
-  Reply,
-  Plus,
-} from "lucide-react";
-import { formatDistanceToNow, isValid, parseISO } from "date-fns";
+import { Hash, Volume2, Users, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import SyntaxHighlighter from "react-syntax-highlighter";
-import {
-  dark,
-  solarizedLight,
-} from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { useTheme } from "@/components/theme-provider";
-
-// Updated imports for API integration
+import { MessageComponent } from "@/components/message/MessageComponent";
 import { useInstanceDetails, useInstanceMembers } from "@/hooks/useServers";
-import {
-  useChannelMessages,
-  useLoadMoreMessages,
-  useSendMessage,
-} from "@/hooks/useMessages";
+import { useChannelMessages, useLoadMoreMessages } from "@/hooks/useMessages";
 import { useUiStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
 import { Message } from "@/lib/api-client";
-
-// Modal imports
-import { MessageActionsModal } from "@/components/modals/MessageActionsModal";
-
-// User type for message component
-interface MessageUser {
-  id: string;
-  username?: string;
-  userName?: string;
-  nickname?: string | null;
-  nickName?: string | null;
-  picture?: string | null;
-}
-
-// Message Props interface
-interface MessageProps {
-  message: Message;
-  user: MessageUser;
-  currentUser: any;
-  replyTo?: Message;
-  replyToUser?: MessageUser;
-  onReply?: (messageId: string) => void;
-}
-
-const MessageComponent: React.FC<MessageProps> = ({
-  message,
-  user,
-  currentUser,
-  replyTo,
-  replyToUser,
-  onReply,
-}) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [showActionsModal, setShowActionsModal] = useState(false);
-
-  const formatTimestamp = (timestamp: string) => {
-    try {
-      // First try parsing as ISO string
-      let date = parseISO(timestamp);
-
-      // If that fails, try regular Date constructor
-      if (!isValid(date)) {
-        date = new Date(timestamp);
-      }
-
-      // Final check if date is valid
-      if (!isValid(date)) {
-        console.error("Invalid timestamp:", timestamp);
-        return "Invalid date";
-      }
-
-      return formatDistanceToNow(date, { addSuffix: true });
-    } catch (error) {
-      console.error("Error formatting timestamp:", timestamp, error);
-      return "Invalid date";
-    }
-  };
-  const isOwnMessage = currentUser?.id === message.userId;
-  const { mode } = useTheme();
-
-  // Get username with fallback
-  const username = user.username || user.userName || "Unknown User";
-  const displayName = user.nickname || user.nickName || username;
-
-  const isDeleted = message.deleted;
-
-  if (isDeleted) {
-    return (
-      <div className="px-4 py-2 opacity-50">
-        <div className="flex gap-3">
-          <div className="w-10 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <div className="text-sm text-concord-secondary italic border border-border rounded px-3 py-2 bg-concord-tertiary/50">
-              This message has been deleted
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <>
-      <div
-        className="group relative px-4 py-2 hover:bg-concord-secondary/50 transition-colors"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <div className="flex gap-3">
-          {/* Avatar - always show */}
-          <div className="w-10 flex-shrink-0">
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={user.picture || undefined} alt={username} />
-              <AvatarFallback className="text-sm bg-primary text-primary-foreground">
-                {username.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-
-          {/* Message content */}
-          <div className="flex-1 min-w-0">
-            {/* Reply line and reference */}
-            {replyTo && replyToUser && (
-              <div className="flex items-center gap-2 mb-2 text-xs text-concord-secondary">
-                <div className="w-6 h-3 border-l-2 border-t-2 border-concord-secondary/50 rounded-tl-md ml-2" />
-                <span className="font-medium text-concord-primary">
-                  {replyToUser.nickname ||
-                    replyToUser.nickName ||
-                    replyToUser.username ||
-                    replyToUser.userName}
-                </span>
-                <span className="truncate max-w-xs opacity-75">
-                  {replyTo.text.replace(/```[\s\S]*?```/g, "[code]")}
-                </span>
-              </div>
-            )}
-
-            {/* Reply line and reference */}
-            {replyTo && replyToUser && (
-              <div className="flex items-center gap-2 mb-2 text-xs text-concord-secondary">
-                <div className="w-6 h-3 border-l-2 border-t-2 border-concord-secondary/50 rounded-tl-md ml-2" />
-                <span className="font-medium text-concord-primary">
-                  {replyToUser.nickname ||
-                    replyToUser.nickName ||
-                    replyToUser.username ||
-                    replyToUser.userName}
-                </span>
-                <span className="truncate max-w-xs opacity-75">
-                  {replyTo.text.replace(/```[\s\S]*?```/g, "[code]")}
-                </span>
-              </div>
-            )}
-
-            {/* Header - always show */}
-            <div className="flex items-baseline gap-2 mb-1">
-              <span className="font-semibold text-concord-primary">
-                {displayName}
-              </span>
-              <span className="text-xs text-concord-secondary">
-                {formatTimestamp(message.createdAt)}
-              </span>
-              {message.edited && (
-                <span className="text-xs text-concord-secondary opacity-60">
-                  (edited)
-                </span>
-              )}
-              {(message as any).pinned && (
-                <Pin className="h-3 w-3 text-yellow-500" />
-              )}
-            </div>
-
-            {/* Message content with markdown */}
-            <div className="text-concord-primary leading-relaxed prose prose-sm max-w-none dark:prose-invert">
-              <ReactMarkdown
-                components={{
-                  code: ({ className, children }) => {
-                    const match = /language-(\w+)/.exec(className || "");
-                    return match ? (
-                      <div className="flex flex-row flex-1 max-w-2/3 flex-wrap !bg-transparent">
-                        <SyntaxHighlighter
-                          PreTag="div"
-                          children={String(children).replace(/\n$/, "")}
-                          language={match[1]}
-                          style={mode === "light" ? solarizedLight : dark}
-                          className="!bg-concord-secondary p-2 border-2 concord-border rounded-xl"
-                        />
-                      </div>
-                    ) : (
-                      <code className={className}>{children}</code>
-                    );
-                  },
-                  blockquote: ({ children }) => (
-                    <blockquote className="border-l-4 border-primary pl-4 my-2 italic text-concord-secondary bg-concord-secondary/30 py-2 rounded-r">
-                      {children}
-                    </blockquote>
-                  ),
-                  p: ({ children }) => (
-                    <p className="my-1 text-concord-primary">{children}</p>
-                  ),
-                  strong: ({ children }) => (
-                    <strong className="font-semibold text-concord-primary">
-                      {children}
-                    </strong>
-                  ),
-                  em: ({ children }) => (
-                    <em className="italic text-concord-primary">{children}</em>
-                  ),
-                  ul: ({ children }) => (
-                    <ul className="list-disc list-inside my-2 text-concord-primary">
-                      {children}
-                    </ul>
-                  ),
-                  ol: ({ children }) => (
-                    <ol className="list-decimal list-inside my-2 text-concord-primary">
-                      {children}
-                    </ol>
-                  ),
-                  h1: ({ children }) => (
-                    <h1 className="text-xl font-bold my-2 text-concord-primary">
-                      {children}
-                    </h1>
-                  ),
-                  h2: ({ children }) => (
-                    <h2 className="text-lg font-bold my-2 text-concord-primary">
-                      {children}
-                    </h2>
-                  ),
-                  h3: ({ children }) => (
-                    <h3 className="text-base font-bold my-2 text-concord-primary">
-                      {children}
-                    </h3>
-                  ),
-                  a: ({ children, href }) => (
-                    <a
-                      href={href}
-                      className="text-primary hover:underline"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {children}
-                    </a>
-                  ),
-                }}
-              >
-                {message.text}
-              </ReactMarkdown>
-            </div>
-          </div>
-
-          {/* Message actions */}
-          {isHovered && (
-            <div className="absolute top-0 right-4 bg-concord-secondary border border-border rounded-md shadow-md flex">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 interactive-hover"
-                onClick={() => onReply?.(message.id)}
-              >
-                <Reply className="h-4 w-4" />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0 interactive-hover"
-                onClick={() => setShowActionsModal(true)}
-              >
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Message Actions Modal */}
-      <MessageActionsModal
-        isOpen={showActionsModal}
-        onClose={() => setShowActionsModal(false)}
-        message={message}
-        isOwnMessage={isOwnMessage}
-        onReply={onReply}
-      />
-    </>
-  );
-};
-
-// Message Input Component
-interface MessageInputProps {
-  channelId: string;
-  channelName?: string;
-  replyingTo?: Message | null;
-  onCancelReply?: () => void;
-  replyingToUser: MessageUser | null;
-}
-
-const MessageInput: React.FC<MessageInputProps> = ({
-  channelId,
-  channelName,
-  replyingTo,
-  onCancelReply,
-  replyingToUser,
-}) => {
-  const [content, setContent] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-
-  // Use the API hook for sending messages
-  const sendMessageMutation = useSendMessage();
-
-  // Auto-resize textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [content]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (content.trim() && !sendMessageMutation.isPending) {
-      try {
-        await sendMessageMutation.mutateAsync({
-          channelId,
-          content: content.trim(),
-          repliedMessageId: replyingTo?.id || null,
-        });
-        setContent("");
-        onCancelReply?.();
-      } catch (error) {
-        console.error("Failed to send message:", error);
-      }
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      formRef.current?.requestSubmit();
-    }
-  };
-
-  return (
-    <div className="px-4 pb-4">
-      {replyingTo && replyingToUser && (
-        <div className="mb-2 p-3 bg-concord-secondary rounded-lg border border-b-0 border-border">
-          <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-4 border-l-2 border-t-2 border-concord-secondary/50 rounded-tl-md ml-2" />
-              <span className="font-medium text-concord-primary">
-                {replyingToUser.nickname ||
-                  replyingToUser.nickName ||
-                  replyingToUser.username ||
-                  replyingToUser.userName}
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-auto p-1 text-concord-secondary hover:text-concord-primary"
-              onClick={onCancelReply}
-            >
-              ×
-            </Button>
-          </div>
-          <div className="text-sm text-concord-primary truncate pl-2">
-            {replyingTo.text.replace(/```[\s\S]*?```/g, "[code]")}
-          </div>
-        </div>
-      )}
-
-      <form ref={formRef} onSubmit={handleSubmit}>
-        <div className="relative">
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={`Message #${channelName || "channel"}`}
-            disabled={sendMessageMutation.isPending}
-            className="w-full bg-concord-tertiary border border-border rounded-lg px-4 py-3 text-concord-primary placeholder-concord-muted resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
-            style={{
-              minHeight: "44px",
-              maxHeight: "200px",
-            }}
-          />
-          <div className="absolute right-3 bottom-3 text-xs text-concord-secondary">
-            {sendMessageMutation.isPending
-              ? "Sending..."
-              : "Press Enter to send • Shift+Enter for new line"}
-          </div>
-        </div>
-      </form>
-    </div>
-  );
-};
+import { MessageInput } from "@/components/message/MessageInput";
 
 const ChatPage: React.FC = () => {
   const { instanceId, channelId } = useParams();
   const navigate = useNavigate();
 
-  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL LOGIC
-  // API hooks - called unconditionally
   const {
     data: instance,
     isLoading: instanceLoading,
@@ -618,7 +220,7 @@ const ChatPage: React.FC = () => {
       </div>
 
       {/* Chat Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-y-auto">
         {/* Messages Area */}
         <ScrollArea className="flex-1 min-h-0">
           {/* Load More Button */}
@@ -670,7 +272,7 @@ const ChatPage: React.FC = () => {
                   console.log(message);
                   const user = users?.find((u) => u.id === message.userId);
                   const replyToMessage = channelMessages?.find(
-                    (m) => m.id === (message as any).repliedMessageId,
+                    (m) => m.id === message.replies?.repliesToId,
                   );
                   const replyToUser = replyToMessage
                     ? users?.find((u) => u.id === replyToMessage.userId)
@@ -683,7 +285,6 @@ const ChatPage: React.FC = () => {
                       key={message.id}
                       message={message}
                       user={user}
-                      currentUser={currentUser}
                       replyTo={replyToMessage}
                       onReply={handleReply}
                       replyToUser={replyToUser}

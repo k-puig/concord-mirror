@@ -52,7 +52,7 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel }) => {
   const connectedUserIds = Array.from(remoteStreams.keys());
 
   return (
-    <div>
+    <div className={`${isActive ?? "visible"}`}>
       <button
         onClick={handleChannelClick}
         className={`w-full flex items-center p-1.5 rounded-md text-left transition-colors ${

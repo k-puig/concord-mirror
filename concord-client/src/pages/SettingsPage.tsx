@@ -1,21 +1,18 @@
 import React, { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import {
   Palette,
   User,
-  Shield,
   Mic,
   Settings,
   ChevronRight,
   Moon,
   Sun,
   Monitor,
-  Lock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -26,7 +23,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ThemeSelector } from "@/components/theme-selector";
 import { useTheme } from "@/components/theme-provider";
 import { useAuthStore } from "@/stores/authStore";
 import { Slider } from "@/components/ui/slider";
@@ -45,12 +41,6 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
     icon: User,
     description: "Profile, privacy, and account settings",
   },
-  // {
-  //   id: "security",
-  //   title: "Security",
-  //   icon: Lock,
-  //   description: "Password and security settings",
-  // },
   {
     id: "appearance",
     title: "Appearance",
@@ -65,207 +55,8 @@ const SETTINGS_SECTIONS: SettingsSection[] = [
   },
 ];
 
-const SecuritySettings: React.FC = () => {
-  const { user } = useAuthStore();
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
-
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      setPasswordError("All password fields are required");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      setPasswordError("New passwords do not match");
-      return;
-    }
-
-    if (newPassword.length < 8) {
-      setPasswordError("New password must be at least 8 characters long");
-      return;
-    }
-
-    setIsChangingPassword(true);
-
-    try {
-      // TODO: Implement actual password change API call
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-
-      console.log("Changing password for user:", user?.id);
-      // const result = await authClient.changePassword({
-      //   userId: user.id,
-      //   currentPassword,
-      //   newPassword,
-      //   token: authStore.token
-      // });
-
-      setPasswordSuccess("Password changed successfully");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-    } catch (error) {
-      setPasswordError(
-        "Failed to change password. Please check your current password.",
-      );
-    } finally {
-      setIsChangingPassword(false);
-    }
-  };
-
-  return (
-    <div className="space-y-6 flex flex-col justify-center self-center items-stretch w-2/3">
-      <Card className="w-full p-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lock className="h-5 w-5" />
-            Change Password
-          </CardTitle>
-          <CardDescription>
-            Update your password to keep your account secure.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {passwordError && (
-            <Alert variant="destructive">
-              <AlertDescription>{passwordError}</AlertDescription>
-            </Alert>
-          )}
-
-          {passwordSuccess && (
-            <Alert>
-              <AlertDescription>{passwordSuccess}</AlertDescription>
-            </Alert>
-          )}
-
-          <form onSubmit={handlePasswordChange} className="space-y-4">
-            <div className="grid gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="current-password">Current Password</Label>
-                <Input
-                  id="current-password"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="max-w-sm"
-                  required
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input
-                  id="new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="max-w-sm"
-                  minLength={8}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">
-                  Must be at least 8 characters long
-                </p>
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                <Input
-                  id="confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="max-w-sm"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <Button
-                type="submit"
-                disabled={
-                  isChangingPassword ||
-                  !currentPassword ||
-                  !newPassword ||
-                  !confirmPassword
-                }
-              >
-                {isChangingPassword
-                  ? "Changing Password..."
-                  : "Change Password"}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card className="w-full p-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Security Options
-          </CardTitle>
-          <CardDescription>
-            Additional security features for your account.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base font-medium">
-                Two-Factor Authentication
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Add an extra layer of security to your account
-              </p>
-            </div>
-            <Switch
-              checked={twoFactorEnabled}
-              onCheckedChange={setTwoFactorEnabled}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="space-y-2">
-            <Label className="text-base font-medium">Active Sessions</Label>
-            <p className="text-sm text-muted-foreground mb-4">
-              Manage devices that are currently logged into your account
-            </p>
-            <Button variant="outline" size="sm">
-              View Active Sessions
-            </Button>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-2">
-            <Label className="text-base font-medium">Account Backup</Label>
-            <p className="text-sm text-muted-foreground mb-4">
-              Download a copy of your account data
-            </p>
-            <Button variant="outline" size="sm">
-              Request Data Export
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
 const AccountSettings: React.FC = () => {
-  const { user, updateUser } = useAuthStore();
+  const { user } = useAuthStore();
   const [username, setUsername] = useState(user?.username || "");
   const [nickname, setNickname] = useState(user?.nickname || "");
   const [bio, setBio] = useState(user?.bio || "");
@@ -281,9 +72,9 @@ const AccountSettings: React.FC = () => {
 
     try {
       // TODO: Implement actual profile update API call
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
 
-      console.log("Updating profile:", { username, nickname, bio });
+      // console.log("Updating profile:", { username, nickname, bio });
       // const updatedUser = await userClient.updateProfile({
       //   userId: user.id,
       //   username: username.trim(),
@@ -293,11 +84,11 @@ const AccountSettings: React.FC = () => {
       // });
 
       // Update local state
-      updateUser({
-        username: username.trim(),
-        nickname: nickname.trim() || null,
-        bio: bio.trim() || null,
-      });
+      // updateUser({
+      //   username: username.trim(),
+      //   nickname: nickname.trim() || null,
+      //   bio: bio.trim() || null,
+      // });
 
       setSaveSuccess("Profile updated successfully");
       setIsChanged(false);
@@ -315,7 +106,7 @@ const AccountSettings: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 flex flex-col justify-center self-center items-stretch w-2/3">
+    <div className="space-y-6 flex flex-col justify-center self-center items-stretch w-full">
       <Card className="w-full p-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -404,50 +195,10 @@ const AccountSettings: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
-      <Card className="w-full p-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5" />
-            Privacy
-          </CardTitle>
-          <CardDescription>
-            Control who can contact you and see your information.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base font-medium">
-                Allow Direct Messages
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Let other users send you direct messages
-              </p>
-            </div>
-            <Switch defaultChecked />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base font-medium">
-                Show Online Status
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Display when you're online to other users
-              </p>
-            </div>
-            <Switch defaultChecked />
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
 
-// Appearance Settings Component (keeping existing implementation)
 const AppearanceSettings: React.FC = () => {
   const {
     currentLightTheme,
@@ -559,18 +310,6 @@ const AppearanceSettings: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base font-medium">
-                Quick Theme Selector
-              </Label>
-              <p className="text-sm text-muted-foreground">
-                Access the theme selector with custom theme creation
-              </p>
-            </div>
-            <ThemeSelector />
-          </div>
-
           {/* Current Theme Display */}
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-lg border p-4">
@@ -727,14 +466,9 @@ const AppearanceSettings: React.FC = () => {
   );
 };
 
-// Voice Settings Component
 const VoiceSettings: React.FC = () => {
   const [inputVolume, setInputVolume] = useState(75);
   const [outputVolume, setOutputVolume] = useState(100);
-  const [pushToTalk, setPushToTalk] = useState(false);
-  const [noiseSuppression, setNoiseSuppression] = useState(true);
-  const [echoCancellation, setEchoCancellation] = useState(true);
-  const [autoGainControl, setAutoGainControl] = useState(true);
 
   return (
     <div className="space-y-6 flex flex-col justify-center self-center items-stretch w-full">
@@ -774,69 +508,6 @@ const VoiceSettings: React.FC = () => {
           </div>
 
           <Separator />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base font-medium">Push to Talk</Label>
-              <p className="text-sm text-muted-foreground">
-                Use a key to transmit voice instead of voice activity
-              </p>
-            </div>
-            <Switch checked={pushToTalk} onCheckedChange={setPushToTalk} />
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="w-full p-6">
-        <CardHeader>
-          <CardTitle>Audio Processing</CardTitle>
-          <CardDescription>
-            Advanced audio processing features to improve call quality.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base font-medium">Noise Suppression</Label>
-              <p className="text-sm text-muted-foreground">
-                Reduce background noise during calls
-              </p>
-            </div>
-            <Switch
-              checked={noiseSuppression}
-              onCheckedChange={setNoiseSuppression}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base font-medium">Echo Cancellation</Label>
-              <p className="text-sm text-muted-foreground">
-                Prevent audio feedback and echo
-              </p>
-            </div>
-            <Switch
-              checked={echoCancellation}
-              onCheckedChange={setEchoCancellation}
-            />
-          </div>
-
-          <Separator />
-
-          <div className="flex items-center justify-between">
-            <div>
-              <Label className="text-base font-medium">Auto Gain Control</Label>
-              <p className="text-sm text-muted-foreground">
-                Automatically adjust microphone sensitivity
-              </p>
-            </div>
-            <Switch
-              checked={autoGainControl}
-              onCheckedChange={setAutoGainControl}
-            />
-          </div>
         </CardContent>
       </Card>
     </div>
@@ -846,13 +517,12 @@ const VoiceSettings: React.FC = () => {
 const SettingsPage: React.FC = () => {
   const { section } = useParams();
   const currentSection = section || "account";
+  const navigate = useNavigate();
 
   const renderSettingsContent = () => {
     switch (currentSection) {
       case "account":
         return <AccountSettings />;
-      case "security":
-        return <SecuritySettings />;
       case "appearance":
         return <AppearanceSettings />;
       case "voice":
@@ -882,10 +552,11 @@ const SettingsPage: React.FC = () => {
                 <Button
                   key={settingsSection.id}
                   variant={isActive ? "secondary" : "ghost"}
+                  onClick={() => navigate(`/settings/${settingsSection.id}`)}
                   className="w-full justify-start mb-1 h-auto p-2"
                   asChild
                 >
-                  <a href={`/settings/${settingsSection.id}`}>
+                  <div>
                     <Icon className="mr-2 h-4 w-4" />
                     <div className="flex-1 text-left">
                       <div className="font-medium">{settingsSection.title}</div>
@@ -896,7 +567,7 @@ const SettingsPage: React.FC = () => {
                       )}
                     </div>
                     <ChevronRight className="h-4 w-4" />
-                  </a>
+                  </div>
                 </Button>
               );
             })}

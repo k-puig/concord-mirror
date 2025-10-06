@@ -58,7 +58,7 @@ const ServerSidebar: React.FC = () => {
             <Button
               variant="ghost"
               size="icon"
-              className={`w-12 h-12 ml-0 rounded-2xl hover:rounded-xl transition-all duration-200 ${
+              className={`w-12 h-12 ml-2 rounded-2xl hover:rounded-xl transition-all duration-200 ${
                 !instanceId || instanceId === "@me"
                   ? "bg-primary text-primary-foreground rounded-xl"
                   : "hover:bg-primary/10"
@@ -74,7 +74,7 @@ const ServerSidebar: React.FC = () => {
         </Tooltip>
 
         {/* Separator */}
-        <div className="w-8 h-0.5 bg-border rounded-full" />
+        <div className="w-12 ml-2 h-0.5 bg-border rounded-full" />
 
         {/* Server List */}
         <div className="flex-1 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-border space-y-2">
