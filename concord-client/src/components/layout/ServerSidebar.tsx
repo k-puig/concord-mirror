@@ -51,21 +51,21 @@ const ServerSidebar: React.FC = () => {
 
   return (
     <TooltipProvider>
-      <div className="sidebar-primary flex flex-col items-center h-full py-2 space-y-2">
+      <div className="sidebar-primary flex flex-col items-center h-full  space-y-2">
         {/* Home/DM Button */}
-        <Tooltip>
+        <Tooltip key={"home-server"}>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className={`w-12 h-12 ml-2 rounded-2xl hover:rounded-xl transition-all duration-200 ${
+              className={`w-10 h-10 p-0 mt-2 ml-2 rounded-full transition-all duration-200 ${
                 !instanceId || instanceId === "@me"
-                  ? "bg-primary text-primary-foreground rounded-xl"
+                  ? "bg-primary text-primary-foreground"
                   : "hover:bg-primary/10"
               }`}
               onClick={handleHomeClick}
             >
-              <Home size={24} />
+              <Home size={4} />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
@@ -74,7 +74,7 @@ const ServerSidebar: React.FC = () => {
         </Tooltip>
 
         {/* Separator */}
-        <div className="w-12 ml-2 h-0.5 bg-border rounded-full" />
+        <div className="w-full ml-0 h-0.5 bg-border rounded-full" />
 
         {/* Server List */}
         <div className="flex-1 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-border space-y-2">

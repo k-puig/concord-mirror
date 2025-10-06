@@ -15,6 +15,7 @@ interface MessageInputProps {
   replyingTo?: Message | null;
   onCancelReply?: () => void;
   replyingToUser: MessageUser | null;
+  messageInputRef: React.RefObject<HTMLInputElement>;
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -23,9 +24,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   replyingTo,
   onCancelReply,
   replyingToUser,
+  messageInputRef,
 }) => {
   const [content, setContent] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = messageInputRef;
   const formRef = useRef<HTMLFormElement>(null);
 
   // Use the API hook for sending messages

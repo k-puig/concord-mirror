@@ -15,6 +15,7 @@ import { MessageInput } from "@/components/message/MessageInput";
 const ChatPage: React.FC = () => {
   const { instanceId, channelId } = useParams();
   const navigate = useNavigate();
+  const messageInputRef = useRef<HTMLInputElement>(null);
 
   const {
     data: instance,
@@ -39,6 +40,7 @@ const ChatPage: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesStartRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null); // Ref for the ScrollArea content wrapper
 
   // API mutation hooks - called unconditionally
   const loadMoreMessagesMutation = useLoadMoreMessages(channelId);
@@ -71,6 +73,7 @@ const ChatPage: React.FC = () => {
 
   // Effects - called unconditionally
   useEffect(() => {
+    // Scroll to bottom when messages load or update
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [channelMessages]);
 
@@ -101,6 +104,40 @@ const ChatPage: React.FC = () => {
     },
     [channelMessages],
   );
+
+  // Focus the message input
+  useEffect(() => {
+    if (messageInputRef.current) {
+      messageInputRef.current.focus();
+    }
+  }, [handleReply]);
+
+  // Effect for scroll to top and load more
+  useEffect(() => {
+    const scrollAreaElement = scrollAreaRef.current;
+
+    const handleScroll = () => {
+      if (
+        scrollAreaElement &&
+        scrollAreaElement.scrollTop === 0 &&
+        channelMessages &&
+        channelMessages.length > 0 &&
+        !isLoadingMore
+      ) {
+        handleLoadMore();
+      }
+    };
+
+    if (scrollAreaElement) {
+      scrollAreaElement.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (scrollAreaElement) {
+        scrollAreaElement.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [channelMessages, isLoadingMore, handleLoadMore]);
 
   // Handle loading states
   if (instanceLoading || messagesLoading || usersLoading) {
@@ -223,84 +260,62 @@ const ChatPage: React.FC = () => {
       <div className="flex-1 flex flex-col overflow-y-auto">
         {/* Messages Area */}
         <ScrollArea className="flex-1 min-h-0">
-          {/* Load More Button */}
-          {channelMessages && channelMessages.length > 0 && (
-            <div className="flex justify-center py-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLoadMore}
-                disabled={isLoadingMore}
-                className="text-xs"
-              >
-                {isLoadingMore ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                ) : (
-                  <Plus className="h-4 w-4 mr-2" />
-                )}
-                {isLoadingMore ? "Loading..." : "Load older messages"}
-              </Button>
-            </div>
-          )}
+          {/* Attach ref to the actual scrollable content */}
+          <div ref={scrollAreaRef} className="h-full overflow-y-auto">
+            <div ref={messagesStartRef} />
 
-          <div ref={messagesStartRef} />
-
-          {/* Welcome Message */}
-          <div className="px-4 py-6 border-b border-concord/50 flex-shrink-0">
-            <div className="flex items-center space-x-3 mb-3">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-                <ChannelIcon size={24} className="text-primary-foreground" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold text-concord-primary">
-                  Welcome to #{currentChannel?.name}!
-                </h3>
-              </div>
-            </div>
-            {currentChannel?.description && (
-              <div className="text-concord-secondary bg-concord-secondary/50 p-3 rounded border-l-4 border-primary">
-                {currentChannel.description}
-              </div>
-            )}
-          </div>
-
-          <div className="pb-4">
-            {/* Messages */}
-            {sortedMessages && sortedMessages.length > 0 ? (
-              <div>
-                {sortedMessages.map((message) => {
-                  console.log(message);
-                  const user = users?.find((u) => u.id === message.userId);
-                  const replyToMessage = channelMessages?.find(
-                    (m) => m.id === message.replies?.repliesToId,
-                  );
-                  const replyToUser = replyToMessage
-                    ? users?.find((u) => u.id === replyToMessage.userId)
-                    : undefined;
-
-                  if (!user) return null;
-
-                  return (
-                    <MessageComponent
-                      key={message.id}
-                      message={message}
-                      user={user}
-                      replyTo={replyToMessage}
-                      onReply={handleReply}
-                      replyToUser={replyToUser}
-                    />
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-center text-concord-secondary">
-                  <p>No messages yet. Start the conversation!</p>
+            {/* Welcome Message */}
+            <div className="px-4 py-6 border-b border-concord/50 flex-shrink-0">
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
+                  <ChannelIcon size={24} className="text-primary-foreground" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-concord-primary">
+                    Welcome to #{currentChannel?.name}!
+                  </h3>
                 </div>
               </div>
-            )}
+            </div>
 
-            <div ref={messagesEndRef} />
+            <div className="pb-4">
+              {/* Messages */}
+              {sortedMessages && sortedMessages.length > 0 ? (
+                <div>
+                  {sortedMessages.map((message) => {
+                    console.log(message);
+                    const user = users?.find((u) => u.id === message.userId);
+                    const replyToMessage = channelMessages?.find(
+                      (m) => m.id === message.replies?.repliesToId,
+                    );
+                    const replyToUser = replyToMessage
+                      ? users?.find((u) => u.id === replyToMessage.userId)
+                      : undefined;
+
+                    if (!user) return null;
+
+                    return (
+                      <MessageComponent
+                        key={message.id}
+                        message={message}
+                        user={user}
+                        replyTo={replyToMessage}
+                        onReply={handleReply}
+                        replyToUser={replyToUser}
+                      />
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-64">
+                  <div className="text-center text-concord-secondary">
+                    <p>No messages yet. Start the conversation!</p>
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
+            </div>
           </div>
         </ScrollArea>
 
@@ -317,6 +332,7 @@ const ChatPage: React.FC = () => {
                   ? users?.find((u) => u.id === replyingTo.userId) || null
                   : null
               }
+              messageInputRef={messageInputRef}
             />
           </div>
         )}
