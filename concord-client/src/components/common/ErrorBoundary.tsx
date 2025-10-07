@@ -2,6 +2,7 @@ import { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card } from "../ui/card";
 
 interface Props {
   children: ReactNode;
@@ -48,8 +49,8 @@ class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-          <div className="max-w-md w-full space-y-4">
+        <div className="min-h-screen bg-concord-primary flex items-center justify-center p-4">
+          <Card className="max-w-md bg-concord-secondary border-concord w-full space-y-4">
             <Alert className="border-red-500 bg-red-950/50">
               <AlertTriangle className="h-4 w-4 text-red-500" />
               <AlertTitle className="text-red-400">
@@ -82,7 +83,7 @@ class ErrorBoundary extends Component<Props, State> {
 
             {/* Error details in development */}
             {process.env.NODE_ENV === "development" && this.state.error && (
-              <details className="mt-4 p-3 bg-gray-800 rounded-lg text-sm">
+              <details className="mt-4 p-3 bg-concord-secondary rounded-lg text-sm">
                 <summary className="cursor-pointer text-red-400 font-medium mb-2">
                   Error Details (Development)
                 </summary>
@@ -107,7 +108,7 @@ class ErrorBoundary extends Component<Props, State> {
                 </div>
               </details>
             )}
-          </div>
+          </Card>
         </div>
       );
     }

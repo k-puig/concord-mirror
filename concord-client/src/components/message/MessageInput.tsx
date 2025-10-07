@@ -1,9 +1,8 @@
-// src/components/message/MessageInput.tsx
-
 import { Message } from "@/lib/api-client";
-import { useState, useRef, useEffect } from "react"; // Keep useRef
+import { useState, useRef, useEffect } from "react";
 import { useSendMessage } from "@/hooks/useMessages";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface MessageUser {
   id: string;
@@ -27,24 +26,21 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   replyingToUser,
 }) => {
   const [content, setContent] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   // Use the API hook for sending messages
   const sendMessageMutation = useSendMessage();
 
-  // Auto-resize textarea and focus when replying
+  // Auto-resize textarea (using direct DOM access as a fallback, no ref needed)
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-
-      // Focus the input when a reply is initiated
-      if (replyingTo) {
-        textareaRef.current.focus();
-      }
+    const textarea = document.getElementById(
+      "message-input-textarea",
+    ) as HTMLTextAreaElement | null;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
     }
-  }, [content, replyingTo]);
+  }, [content]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +67,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className="px-4 pb-4">
+    <div className="px-2 pb-2">
       {replyingTo && replyingToUser && (
         <div className="mb-2 p-3 bg-concord-secondary rounded-lg border border-b-0 border-border">
           <div className="flex items-center justify-between mb-1">
@@ -97,26 +93,15 @@ export const MessageInput: React.FC<MessageInputProps> = ({
       )}
 
       <form ref={formRef} onSubmit={handleSubmit}>
-        <div className="relative">
-          <textarea
-            ref={textareaRef}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder={`Message #${channelName || "channel"}`}
-            disabled={sendMessageMutation.isPending}
-            className="w-full bg-concord-tertiary border border-border rounded-lg px-4 py-3 text-concord-primary placeholder-concord-muted resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
-            style={{
-              minHeight: "44px",
-              maxHeight: "200px",
-            }}
-          />
-          <div className="absolute right-3 bottom-3 text-xs text-concord-secondary">
-            {sendMessageMutation.isPending
-              ? "Sending..."
-              : "Press Enter to send • Shift+Enter for new line"}
-          </div>
-        </div>
+        <Textarea
+          id="message-input-textarea" // Unique ID for DOM targeting
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={`Message #${channelName || "channel"}`}
+          disabled={sendMessageMutation.isPending}
+          className="w-full bg-concord-tertiary border border-border rounded-lg px-4 py-3 text-concord-primary placeholder-concord-muted resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 min-h-8 max-h-56"
+        />
       </form>
     </div>
   );

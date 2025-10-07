@@ -256,6 +256,8 @@ export class ApiClient {
     requestingUserId: string;
     requestingUserToken: string;
   }): Promise<Channel> {
+    console.log(data);
+
     return this.request<Channel>("/api/channel", {
       method: "POST",
       body: JSON.stringify(data),

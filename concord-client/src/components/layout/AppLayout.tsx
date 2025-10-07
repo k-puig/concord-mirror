@@ -39,7 +39,7 @@ const AppLayout: React.FC = () => {
       <VoiceConnectionManager />
 
       {/* Server List Sidebar - Always visible on desktop, overlay on mobile */}
-      <div className="relative w-[72px] sidebar-primary flex-shrink-0">
+      <div className="relative min-w-1/16 sidebar-primary flex-shrink-0">
         <ServerSidebar />
       </div>
       {/* Channel Sidebar - Only shown when in a server context and not collapsed */}
@@ -68,7 +68,7 @@ const AppLayout: React.FC = () => {
       </div>
       {/* Member List - Only shown when in a channel and member list is enabled */}
       {showMemberList && shouldShowChannelSidebar && (
-        <div className="flex-0 sidebar-secondary order-l border-sidebar">
+        <div className="flex-0 min-w-1/7 sidebar-secondary order-l border-sidebar">
           <MemberList />
         </div>
       )}

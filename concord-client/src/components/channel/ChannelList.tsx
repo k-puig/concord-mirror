@@ -18,7 +18,7 @@ const CategoryHeader: React.FC<CategoryHeaderProps> = ({
   return (
     <Button
       variant="ghost"
-      className="w-full justify-between p-4 h-6 text-md text-primary-foreground font-semibold interactive-hover uppercase tracking-wide group"
+      className="w-full justify-between p-4 h-6 text-md text-concord-primary font-semibold interactive-hover uppercase tracking-wide group"
       onClick={() => {
         onToggle();
       }}

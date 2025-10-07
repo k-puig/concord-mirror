@@ -206,16 +206,16 @@ const MemberList: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col flex-1 border-l border-concord-primary h-full bg-concord-secondary">
+    <div className="flex flex-col flex-grow-1 w-full border-l border-concord h-full sidebar-secondary">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-concord-primary flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <UserIcon size={20} className="text-concord-primary" />
-          <p className="text-sm font-semibold text-concord-primary tracking-wide">
+      <div className="px-6 py-4 pb-5 border-b border-concord flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <UserIcon size={20} className="h-5 w-5 text-concord-secondary" />
+          <p className="font-semibold text-xl text-concord-primary tracking-wide">
             Members
           </p>
         </div>
-        <p className="text-sm font-medium text-concord-secondary tracking-wide">
+        <p className="font-medium text-concord-secondary tracking-wide">
           {members.length}
         </p>
       </div>

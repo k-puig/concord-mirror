@@ -72,16 +72,6 @@ const AccountSettings: React.FC = () => {
 
     try {
       // TODO: Implement actual profile update API call
-      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-
-      // console.log("Updating profile:", { username, nickname, bio });
-      // const updatedUser = await userClient.updateProfile({
-      //   userId: user.id,
-      //   username: username.trim(),
-      //   nickname: nickname.trim() || null,
-      //   bio: bio.trim() || null,
-      //   token: authStore.token
-      // });
 
       // Update local state
       // updateUser({
@@ -595,7 +585,7 @@ const SettingsPage: React.FC = () => {
         </div>
 
         {/* Content */}
-        <ScrollArea className="min-h-0 w-full">
+        <ScrollArea className="min-h-0 w-full bg-concord-primary h-full">
           <div className="p-6 flex w-full">{renderSettingsContent()}</div>
         </ScrollArea>
       </div>

@@ -133,7 +133,7 @@ const UserPanel: React.FC = () => {
     useVoiceStore();
 
   return (
-    <div className="user-panel flex items-center p-2 bg-concord-tertiary border-t border-sidebar">
+    <div className="user-panel flex items-center p-3 bg-concord-tertiary border-t border-sidebar min-h-16 rounded-xl m-2">
       {/* User Info */}
       <UserAvatar user={user} size="md" />
       <div className="ml-2 flex-1 min-w-0 text-left">

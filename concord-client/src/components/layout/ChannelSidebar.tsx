@@ -1,12 +1,12 @@
 import React from "react";
 import { useParams } from "react-router";
-import { ChevronDown, Plus, Users } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useInstanceDetails } from "@/hooks/useServers";
 import { useUiStore } from "@/stores/uiStore";
 import ChannelList from "@/components/channel/ChannelList";
-import { CreateCategoryModal, CreateChannelModal } from "../server/ServerIcon";
+import { CreateChannelModal } from "@/components/modals/CreateChannelModal";
 
 const ChannelSidebar: React.FC = () => {
   const { instanceId } = useParams();
@@ -14,8 +14,8 @@ const ChannelSidebar: React.FC = () => {
     useInstanceDetails(instanceId);
   const categories = instance?.categories;
   const {
-    toggleMemberList,
-    showMemberList,
+    showCreateChannel,
+    closeCreateChannel,
     openCreateChannel,
     openServerSettings,
   } = useUiStore();
@@ -45,11 +45,11 @@ const ChannelSidebar: React.FC = () => {
     <div className="sidebar-secondary flex-1">
       <ScrollArea className="">
         {/* Server Header */}
-        <div className="flex items-center justify-between border-b border-concord-primary shadow-sm px-4 py-3">
+        <div className="flex items-center justify-between border-b border-concord-primary shadow-sm px-6 py-4">
           <div className="flex items-center space-x-2 flex-1 min-w-0">
             <Button
               variant="ghost"
-              className="flex items-center justify-between w-full h-8 font-semibold text-concord-primary hover:bg-concord-tertiary"
+              className="flex items-center justify-between w-full h-8 font-semibold text-concord-primary text-xl hover:bg-concord-tertiary"
               onClick={openServerSettings}
             >
               <span className="truncate">{instance.name}</span>
@@ -83,20 +83,15 @@ const ChannelSidebar: React.FC = () => {
               <Plus size={16} className="mr-1" />
               Add Channel
             </Button>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className={`h-8 w-8 flex-shrink-0 ${showMemberList ? "text-interactive-active" : "interactive-hover"}`}
-              onClick={toggleMemberList}
-            >
-              <Users size={16} />
-            </Button>
           </div>
         </div>
       </ScrollArea>
-      <CreateChannelModal />
-      <CreateCategoryModal />
+      <CreateChannelModal
+        isOpen={showCreateChannel}
+        onClose={closeCreateChannel}
+        categories={categories}
+        instanceId={instance.id}
+      />
     </div>
   );
 };

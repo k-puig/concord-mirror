@@ -38,11 +38,6 @@ const ChannelItem: React.FC<ChannelItemProps> = ({ channel }) => {
       if (isConnectedToThisChannel) {
         leaveChannel();
       } else if (currentUser && token) {
-        console.log({
-          channelId: channel.id,
-          currentUser: currentUser.id,
-          token: token,
-        });
         joinChannel(channel.id, currentUser.id, token);
       }
     }

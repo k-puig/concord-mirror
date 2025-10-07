@@ -71,7 +71,6 @@ export const useVoiceStore = create<VoiceState & VoiceActions>((set, get) => {
    * @returns The configured RTCPeerConnection instance.
    */
   const createPeerConnection = (targetUserId: string): RTCPeerConnection => {
-    console.log(`Creating peer connection for: ${targetUserId}`);
     const { iceServers, localStream, socket, peerConnections } = get();
 
     const peerConnection = new RTCPeerConnection({ iceServers });
@@ -95,7 +94,6 @@ export const useVoiceStore = create<VoiceState & VoiceActions>((set, get) => {
 
     // Handle incoming remote tracks
     peerConnection.ontrack = (event) => {
-      console.log(`Received remote track from: ${targetUserId}`);
       set((state) => {
         const newStreams = new Map(state.remoteStreams);
         newStreams.set(targetUserId, event.streams[0]);
@@ -105,9 +103,6 @@ export const useVoiceStore = create<VoiceState & VoiceActions>((set, get) => {
 
     // For debugging connection state
     peerConnection.onconnectionstatechange = () => {
-      console.log(
-        `Connection state change for ${targetUserId}: ${peerConnection.connectionState}`,
-      );
       if (
         peerConnection.connectionState === "disconnected" ||
         peerConnection.connectionState === "failed"
@@ -128,10 +123,6 @@ export const useVoiceStore = create<VoiceState & VoiceActions>((set, get) => {
     connectedUserIds: string[];
     iceServers: IceServerConfig[];
   }) => {
-    console.log(
-      "Successfully joined voice channel. Users:",
-      data.connectedUserIds,
-    );
     set({
       iceServers: data.iceServers,
       isConnecting: false,
@@ -150,7 +141,6 @@ export const useVoiceStore = create<VoiceState & VoiceActions>((set, get) => {
   };
 
   const onUserLeft = (data: { userId: string }) => {
-    console.log(`User ${data.userId} left the channel.`);
     cleanupPeerConnection(data.userId);
   };
 
@@ -158,7 +148,6 @@ export const useVoiceStore = create<VoiceState & VoiceActions>((set, get) => {
     senderUserId: string;
     sdp: RTCSessionDescriptionInit;
   }) => {
-    console.log("Received WebRTC offer from:", data.senderUserId);
     const peerConnection = createPeerConnection(data.senderUserId);
     await peerConnection.setRemoteDescription(
       new RTCSessionDescription(data.sdp),
@@ -175,7 +164,6 @@ export const useVoiceStore = create<VoiceState & VoiceActions>((set, get) => {
     senderUserId: string;
     sdp: RTCSessionDescriptionInit;
   }) => {
-    console.log("Received WebRTC answer from:", data.senderUserId);
     const peerConnection = get().peerConnections.get(data.senderUserId);
     if (peerConnection) {
       await peerConnection.setRemoteDescription(
@@ -271,7 +259,6 @@ export const useVoiceStore = create<VoiceState & VoiceActions>((set, get) => {
         get();
       if (!socket || !activeVoiceChannelId) return;
 
-      console.log(`Leaving voice channel: ${activeVoiceChannelId}`);
       socket.emit("leave-voicechannel", { channelId: activeVoiceChannelId });
 
       // Clean up all event listeners

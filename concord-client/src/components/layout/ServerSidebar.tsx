@@ -51,17 +51,17 @@ const ServerSidebar: React.FC = () => {
 
   return (
     <TooltipProvider>
-      <div className="sidebar-primary flex flex-col items-center h-full  space-y-2">
+      <div className="sidebar-primary flex flex-col items-center h-full space-y-2 w-full">
         {/* Home/DM Button */}
         <Tooltip key={"home-server"}>
           <TooltipTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className={`w-10 h-10 p-0 mt-2 ml-2 rounded-full transition-all duration-200 ${
+              className={`w-12 h-12 mt-2 transition-all duration-200 ${
                 !instanceId || instanceId === "@me"
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-primary/10"
+                  ? "rounded-xl border-primary bg-primary/10 border-2"
+                  : "rounded-2xl hover:rounded-xl border hover:border-primary/50"
               }`}
               onClick={handleHomeClick}
             >
@@ -72,10 +72,8 @@ const ServerSidebar: React.FC = () => {
             <p>{isGlobalAdmin(currentUser) ? "Admin Dashboard" : "Home"}</p>
           </TooltipContent>
         </Tooltip>
-
         {/* Separator */}
-        <div className="w-full ml-0 h-0.5 bg-border rounded-full" />
-
+        <div className="w-full h-0.5 bg-border rounded-full" />{" "}
         {/* Server List */}
         <div className="flex-1 flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-border space-y-2">
           {isLoading ? (
@@ -116,26 +114,25 @@ const ServerSidebar: React.FC = () => {
               )}
             </div>
           ) : null}
+          {/* Add Server Button - Only show if user can create servers */}
+          {canCreateServer && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="w-12 mb-4 h-12 rounded-2xl hover:rounded-xl bg-concord-secondary hover:bg-green-600 text-green-500 hover:text-white transition-all duration-200"
+                  onClick={handleCreateServer}
+                >
+                  <Plus size={24} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Add a Server</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
         </div>
-
-        {/* Add Server Button - Only show if user can create servers */}
-        {canCreateServer && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="w-12 h-12 ml-3 rounded-2xl hover:rounded-xl bg-concord-secondary hover:bg-green-600 text-green-500 hover:text-white transition-all duration-200"
-                onClick={handleCreateServer}
-              >
-                <Plus size={24} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right">
-              <p>Add a Server</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
       </div>
     </TooltipProvider>
   );

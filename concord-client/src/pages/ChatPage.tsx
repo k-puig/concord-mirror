@@ -76,6 +76,44 @@ const ChatPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [channelMessages]);
 
+  // Auto-focus on channel change or initial load (using DOM query)
+  useEffect(() => {
+    if (!currentUser) return; // Skip if input isn't rendered
+
+    let retryCount = 0;
+    const maxRetries = 10;
+    const retryInterval = 100; // ms
+
+    const focusInput = () => {
+      retryCount++;
+      const textarea = document.getElementById(
+        "message-input-textarea",
+      ) as HTMLTextAreaElement | null;
+      if (textarea) {
+        textarea.focus();
+      } else if (retryCount < maxRetries) {
+        setTimeout(focusInput, retryInterval);
+      }
+    };
+
+    focusInput();
+  }, [channelId, currentUser]);
+
+  useEffect(() => {
+    if (!replyingTo) return; // Skip if no reply
+
+    const focusInput = () => {
+      const textarea = document.getElementById(
+        "message-input-textarea",
+      ) as HTMLTextAreaElement | null;
+      if (textarea) {
+        textarea.focus();
+      }
+    };
+
+    focusInput();
+  }, [replyingTo]);
+
   // Event handlers
   const handleLoadMore = React.useCallback(async () => {
     if (!channelMessages || channelMessages.length === 0 || isLoadingMore)
@@ -214,10 +252,10 @@ const ChatPage: React.FC = () => {
   return (
     <div className="flex flex-col flex-shrink h-full bg-concord-primary">
       {/* Channel Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-concord bg-concord-secondary">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-concord bg-concord-secondary">
         <div className="flex items-center space-x-2">
           <ChannelIcon size={20} className="text-concord-secondary" />
-          <span className="font-semibold text-concord-primary">
+          <span className="font-semibold text-xl text-concord-primary">
             {currentChannel?.name}
           </span>
           {currentChannel?.description && (
@@ -275,7 +313,6 @@ const ChatPage: React.FC = () => {
               {sortedMessages && sortedMessages.length > 0 ? (
                 <div>
                   {sortedMessages.map((message) => {
-                    console.log(message);
                     const user = users?.find((u) => u.id === message.userId);
                     const replyToMessage = channelMessages?.find(
                       (m) => m.id === message.replies?.repliesToId,
