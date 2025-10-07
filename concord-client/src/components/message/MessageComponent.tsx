@@ -16,7 +16,7 @@ import { useState } from "react";
 interface MessageUser {
   id: string;
   username?: string;
-  nickName?: string | null;
+  nickname?: string | null;
   picture?: string | null;
 }
 
@@ -64,8 +64,8 @@ export const MessageComponent: React.FC<MessageProps> = ({
   const { mode } = useTheme();
 
   // Get username with fallback
-  const username = user.username || user.userName || "Unknown User";
-  const displayName = user.nickname || user.nickName || username;
+  const username = user.username || user.username || "Unknown User";
+  const displayName = user.nickname || user.nickname || username;
 
   const isDeleted = message.deleted;
 
@@ -109,10 +109,7 @@ export const MessageComponent: React.FC<MessageProps> = ({
               <div className="flex items-center gap-2 mb-2 text-xs text-concord-secondary">
                 <div className="w-6 h-3 border-l-2 border-t-2 border-concord-secondary/50 rounded-tl-md ml-2" />
                 <span className="font-medium text-concord-primary">
-                  {replyToUser.nickname ||
-                    replyToUser.nickName ||
-                    replyToUser.username ||
-                    replyToUser.userName}
+                  {replyToUser.nickname || replyToUser.username}
                 </span>
                 <span className="truncate max-w-xs opacity-75">
                   {replyTo.text.replace(/```[\s\S]*?```/g, "[code]")}

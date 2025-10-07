@@ -1,12 +1,14 @@
+// src/components/message/MessageInput.tsx
+
 import { Message } from "@/lib/api-client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react"; // Keep useRef
 import { useSendMessage } from "@/hooks/useMessages";
 import { Button } from "@/components/ui/button";
 
 interface MessageUser {
   id: string;
   username?: string;
-  nickName?: string | null;
+  nickname?: string | null;
   picture?: string | null;
 }
 interface MessageInputProps {
@@ -15,7 +17,6 @@ interface MessageInputProps {
   replyingTo?: Message | null;
   onCancelReply?: () => void;
   replyingToUser: MessageUser | null;
-  messageInputRef: React.RefObject<HTMLInputElement>;
 }
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -24,22 +25,26 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   replyingTo,
   onCancelReply,
   replyingToUser,
-  messageInputRef,
 }) => {
   const [content, setContent] = useState("");
-  const textareaRef = messageInputRef;
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   // Use the API hook for sending messages
   const sendMessageMutation = useSendMessage();
 
-  // Auto-resize textarea
+  // Auto-resize textarea and focus when replying
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+
+      // Focus the input when a reply is initiated
+      if (replyingTo) {
+        textareaRef.current.focus();
+      }
     }
-  }, [content]);
+  }, [content, replyingTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +78,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
             <div className="flex items-center gap-2">
               <div className="w-6 h-4 border-l-2 border-t-2 border-concord-secondary/50 rounded-tl-md ml-2" />
               <span className="font-medium text-concord-primary">
-                {replyingToUser.nickname || replyingToUser.userName}
+                {replyingToUser.nickname || replyingToUser.username}
               </span>
             </div>
             <Button

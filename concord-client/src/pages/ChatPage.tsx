@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Hash, Volume2, Users, Plus } from "lucide-react";
+import { Hash, Volume2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -15,7 +15,6 @@ import { MessageInput } from "@/components/message/MessageInput";
 const ChatPage: React.FC = () => {
   const { instanceId, channelId } = useParams();
   const navigate = useNavigate();
-  const messageInputRef = useRef<HTMLInputElement>(null);
 
   const {
     data: instance,
@@ -104,13 +103,6 @@ const ChatPage: React.FC = () => {
     },
     [channelMessages],
   );
-
-  // Focus the message input
-  useEffect(() => {
-    if (messageInputRef.current) {
-      messageInputRef.current.focus();
-    }
-  }, [handleReply]);
 
   // Effect for scroll to top and load more
   useEffect(() => {
@@ -332,7 +324,6 @@ const ChatPage: React.FC = () => {
                   ? users?.find((u) => u.id === replyingTo.userId) || null
                   : null
               }
-              messageInputRef={messageInputRef}
             />
           </div>
         )}

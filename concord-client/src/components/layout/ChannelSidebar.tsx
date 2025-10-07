@@ -73,11 +73,11 @@ const ChannelSidebar: React.FC = () => {
 
         {/* Bottom Actions */}
         <div className="border-t border-sidebar px-2 py-2">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center">
             <Button
               variant="ghost"
               size="sm"
-              className="interactive-hover"
+              className="justify-start interactive-hover flex-grow-1"
               onClick={openCreateChannel}
             >
               <Plus size={16} className="mr-1" />
@@ -87,7 +87,7 @@ const ChannelSidebar: React.FC = () => {
             <Button
               variant="ghost"
               size="icon"
-              className={`h-8 w-8 ${showMemberList ? "text-interactive-active" : "interactive-hover"}`}
+              className={`h-8 w-8 flex-shrink-0 ${showMemberList ? "text-interactive-active" : "interactive-hover"}`}
               onClick={toggleMemberList}
             >
               <Users size={16} />
