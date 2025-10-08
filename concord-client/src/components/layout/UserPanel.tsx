@@ -8,18 +8,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import { useAuthStore } from "@/stores/authStore";
-import { useUiStore } from "@/stores/uiStore";
-import { useLogout } from "@/hooks/useAuth";
 import { useVoiceStore } from "@/stores/voiceStore";
+import { useNavigate } from "react-router";
 
 // Status color utility
 const getStatusColor = (status: string) => {
@@ -35,70 +27,12 @@ const getStatusColor = (status: string) => {
   }
 };
 
-// User Status Dropdown Component
-interface UserStatusDropdownProps {
-  currentStatus: string;
-  onStatusChange: (status: string) => void;
-  children: React.ReactNode;
-}
-
-const UserStatusDropdown: React.FC<UserStatusDropdownProps> = ({
-  // currentStatus,
-  onStatusChange,
-  children,
-}) => {
-  const { mutate: logout } = useLogout();
-
-  const statusOptions = [
-    { value: "online", label: "Online", color: "bg-status-online" },
-    { value: "away", label: "Away", color: "bg-status-away" },
-    { value: "busy", label: "Do Not Disturb", color: "bg-status-busy" },
-    { value: "offline", label: "Invisible", color: "bg-status-offline" },
-  ];
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="checkchekchek" asChild>
-        {children}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="w-48">
-        {statusOptions.map((status) => (
-          <DropdownMenuItem
-            key={status.value}
-            onClick={() => onStatusChange(status.value)}
-          >
-            <div className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${status.color}`} />
-              <span>{status.label}</span>
-            </div>
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => useUiStore.getState().openUserSettings()}
-        >
-          <Settings size={16} className="mr-2" />
-          User Settings
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => logout()}
-          className="text-destructive focus:text-destructive"
-        >
-          Log Out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
-
 // Voice Controls Component
 interface VoiceControlsProps {
   isMuted: boolean;
   isDeafened: boolean;
   onMuteToggle: () => void;
   onDeafenToggle: () => void;
-  onSettingsClick: () => void;
 }
 
 const VoiceControls: React.FC<VoiceControlsProps> = ({
@@ -106,7 +40,6 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
   isDeafened,
   onMuteToggle,
   onDeafenToggle,
-  onSettingsClick,
 }) => {
   return (
     <div className="flex items-center space-x-1">
@@ -146,21 +79,6 @@ const VoiceControls: React.FC<VoiceControlsProps> = ({
         </Tooltip>
 
         {/* Settings */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 interactive-hover"
-              onClick={onSettingsClick}
-            >
-              <Settings size={18} />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>User Settings</p>
-          </TooltipContent>
-        </Tooltip>
       </TooltipProvider>
     </div>
   );
@@ -207,40 +125,25 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   );
 };
 
-// Main UserPanel Component
 const UserPanel: React.FC = () => {
   const { user } = useAuthStore();
-  const { openUserSettings } = useUiStore();
+  const navigate = useNavigate();
 
   const { isConnected, isMuted, isDeafened, toggleMute, toggleDeafen } =
     useVoiceStore();
 
-  const handleStatusChange = (newStatus: string) => {
-    console.log("Status change to:", newStatus);
-  };
-
   return (
-    <div className="user-panel flex items-center p-2 bg-concord-tertiary border-t border-sidebar">
-      {/* User Info with Dropdown */}
-      <UserStatusDropdown
-        currentStatus={user?.status as string}
-        onStatusChange={handleStatusChange}
-      >
-        <Button
-          variant="ghost"
-          className="flex-1 flex items-center h-auto p-1 rounded-md hover:bg-concord-secondary"
-        >
-          <UserAvatar user={user} size="md" />
-          <div className="ml-2 flex-1 min-w-0 text-left">
-            <div className="text-sm font-medium text-concord-primary truncate">
-              {user?.nickname || user?.username}
-            </div>
-            <div className="text-xs text-concord-secondary truncate capitalize">
-              {user?.status}
-            </div>
-          </div>
-        </Button>
-      </UserStatusDropdown>
+    <div className="user-panel flex items-center p-3 bg-concord-tertiary border-t border-sidebar min-h-16 rounded-xl m-2">
+      {/* User Info */}
+      <UserAvatar user={user} size="md" />
+      <div className="ml-2 flex-1 min-w-0 text-left">
+        <div className="text-sm font-medium text-concord-primary truncate">
+          {user?.nickname || user?.username}
+        </div>
+        <div className="text-xs text-concord-secondary truncate capitalize">
+          {user?.status}
+        </div>
+      </div>
 
       {/* Voice Controls */}
       {isConnected && (
@@ -249,9 +152,26 @@ const UserPanel: React.FC = () => {
           isDeafened={isDeafened}
           onMuteToggle={toggleMute}
           onDeafenToggle={toggleDeafen}
-          onSettingsClick={openUserSettings}
         />
       )}
+
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 interactive-hover"
+              onClick={() => navigate("/settings")}
+            >
+              <Settings size={18} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>User Settings</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 };

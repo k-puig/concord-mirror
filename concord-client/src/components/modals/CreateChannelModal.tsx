@@ -11,39 +11,58 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Hash, Volume2, Loader2 } from "lucide-react";
 import { useCreateChannel } from "@/hooks/useServers";
+import { CategoryWithChannels } from "@/types";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface CreateChannelModalProps {
   isOpen: boolean;
   onClose: () => void;
-  instanceId: string; // Changed to use instanceId instead of categories prop
-  defaultCategoryId?: string;
+  instanceId: string;
+  categories: CategoryWithChannels[] | undefined;
 }
 
 export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
   isOpen,
   onClose,
-  defaultCategoryId,
+  categories,
 }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<"text" | "voice">("text");
-  const [categoryId, setCategoryId] = useState(defaultCategoryId || "");
+  const [categoryId, setCategoryId] = useState("");
 
   const createChannelMutation = useCreateChannel();
 
-  // Reset form when modal opens/closes
+  // Reset form when modal opens or closes
   useEffect(() => {
     if (!isOpen) {
       setName("");
       setDescription("");
       setType("text");
-      setCategoryId(defaultCategoryId || "");
+      setCategoryId("");
+    } else {
+      setCategoryId("");
     }
-  }, [isOpen, defaultCategoryId]);
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !categoryId) return;
+    // Basic validation: ensure name is not empty and a category is selected
+    if (!name.trim() || !categoryId || categoryId === "no-categories") {
+      console.warn("Channel name and a valid category are required.");
+      toast("Error", {
+        description: "Channel name and a valid category are required.",
+      });
+      return;
+    }
 
     try {
       await createChannelMutation.mutateAsync({
@@ -53,16 +72,24 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
         categoryId,
       });
 
-      // Reset form
+      // Reset form after successful creation
       setName("");
       setDescription("");
       setType("text");
-      setCategoryId(defaultCategoryId || "");
+      setCategoryId(""); // Reset to default or empty
       onClose();
     } catch (error) {
       console.error("Failed to create channel:", error);
+      toast("Error", { description: <p>{`${error}`}</p> });
     }
   };
+
+  // Helper to determine if the form is in a valid state for submission
+  const isFormInvalid =
+    !name.trim() || // Name is required and cannot be just whitespace
+    !categoryId || // Category must be selected
+    categoryId === "no-categories" || // Handle the "no categories available" placeholder
+    createChannelMutation.isPending; // Disable while mutation is in progress
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -72,12 +99,13 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Channel Type Selection */}
           <div className="space-y-2">
             <Label>Channel Type</Label>
             <div className="flex gap-2">
               <Button
                 type="button"
-                variant={type === "text" ? "default" : "outline"}
+                variant={type === "text" ? "secondary" : "ghost"}
                 onClick={() => setType("text")}
                 className="flex-1"
               >
@@ -86,7 +114,7 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
               </Button>
               <Button
                 type="button"
-                variant={type === "voice" ? "default" : "outline"}
+                variant={type === "voice" ? "secondary" : "ghost"}
                 onClick={() => setType("voice")}
                 className="flex-1"
               >
@@ -96,6 +124,7 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
             </div>
           </div>
 
+          {/* Channel Name Input */}
           <div className="space-y-2">
             <Label htmlFor="channel-name">Channel Name</Label>
             <Input
@@ -107,6 +136,35 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
             />
           </div>
 
+          {/* Category Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="channel-category">Category</Label>
+            <Select
+              value={categoryId}
+              onValueChange={(value) => setCategoryId(value)}
+              required
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories && categories.length > 0 ? (
+                  categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))
+                ) : (
+                  // Display this option if there are no categories
+                  <SelectItem value="no-categories" disabled>
+                    No categories available
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Channel Description Textarea */}
           <div className="space-y-2">
             <Label htmlFor="channel-description">Description</Label>
             <Textarea
@@ -118,20 +176,12 @@ export const CreateChannelModal: React.FC<CreateChannelModalProps> = ({
             />
           </div>
 
+          {/* Action Buttons */}
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={
-                !name.trim() ||
-                !categoryId ||
-                createChannelMutation.isPending ||
-                categoryId === "loading" ||
-                categoryId === "no-categories"
-              }
-            >
+            <Button type="submit" disabled={isFormInvalid}>
               {createChannelMutation.isPending ? (
                 <div className="flex items-center gap-2">
                   <Loader2 className="h-4 w-4 animate-spin" />

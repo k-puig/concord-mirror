@@ -156,12 +156,6 @@ export const useEditMessage = () => {
       }
 
       // TODO: Replace with actual API call when available
-      console.log(
-        "Editing message:",
-        data.messageId,
-        "New content:",
-        data.content,
-      );
 
       return {
         success: true,
@@ -207,10 +201,6 @@ export const usePinMessage = () => {
       }
 
       // TODO: Replace with actual API call when available
-      console.log(
-        `${data.pinned ? "Pinning" : "Unpinning"} message:`,
-        data.messageId,
-      );
 
       return {
         success: true,
