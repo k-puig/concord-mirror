@@ -1,0 +1,28 @@
+{
+  "name": "@concord/database",
+  "scripts": {
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "bun src/seed.ts",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@concord/biome-config": "workspace:*",
+    "@concord/tsconfig": "workspace:*",
+    "@types/bun": "latest",
+    "bcryptjs": "^3.0.2",
+    "prisma": "^6.17.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.17.0"
+  },
+  "exports": {
+    ".": "./src/client.ts"
+  }
+}

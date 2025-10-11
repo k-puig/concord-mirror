@@ -1,0 +1,234 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated"
+}
+
+// Enums
+enum UserStatus {
+  online
+  offline
+  invisible
+  dnd
+  idle
+}
+
+enum ChannelType {
+  voice
+  text
+  forum
+}
+
+// Core
+model User {
+  id           String     @id @default(cuid())
+  username     String     @unique @db.VarChar(32)
+  nickname     String?    @db.VarChar(64)
+  bio          String?    @db.VarChar(1024)
+  picture      String?    @db.VarChar(2048)
+  banner       String?    @db.VarChar(2048)
+  status       UserStatus @default(offline)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @default(now()) @map("updated_at")
+  passwordHash String     @db.VarChar(255)
+  isOwner      Boolean    @default(false)
+  isAdmin      Boolean    @default(false)
+
+  // Relations
+  RoleAssign   RoleAssign[]
+  Message      Message[]
+  Reaction     Reaction[]
+  UserPing     UserPing[]
+  Timeout      Timeout[]
+  RefreshToken RefreshToken[]
+}
+
+model Server {
+  id          String  @id @default(cuid())
+  name        String  @unique @db.VarChar(32)
+  description String? @db.VarChar(1024)
+  icon        String? @db.VarChar(2048)
+
+  // FKs
+  headCategoryId String?   @unique @map("head_category_id")
+  headCategory   Category? @relation("ServerHeadCategory", fields: [headCategoryId], references: [id], onUpdate: NoAction, onDelete: SetNull)
+
+  // Relations
+  Category Category[]
+  Channel  Channel[]
+  Role     Role[]
+  Timeout  Timeout[]
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique @db.VarChar(64)
+
+  // FKs (Linked-List)
+  nextCategoryId  String?    @unique @map("next_category_id")
+  nextCategory    Category?  @relation("CategoryOrder", fields: [nextCategoryId], references: [id], onUpdate: NoAction, onDelete: SetNull)
+  prevCategory    Category?  @relation("CategoryOrder")
+
+  serverId String @map("server_id")
+  server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  headChannelId String?  @unique @map("head_channel_id")
+  headChannel   Channel? @relation("CategoryHeadChannel", fields: [headChannelId], references: [id], onUpdate: NoAction, onDelete: SetNull)
+  // Relations
+  serverLink    Server?  @relation("ServerHeadCategory")
+}
+
+model Channel {
+  id          String      @id @default(cuid())
+  name        String      @unique @db.VarChar(64)
+  description String?     @db.VarChar(1024)
+  type        ChannelType @default(text)
+
+  // FKs (Linked-List)
+  nextChannelId String?  @unique @map("next_channel_id")
+  nextChannel   Channel? @relation("ChannelOrder", fields: [nextChannelId], references: [id], onUpdate: NoAction, onDelete: SetNull)
+  prevChannel   Channel? @relation("ChannelOrder")
+
+  serverId String @map("server_id")
+  server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  // Relations
+  categoryLink       Category?            @relation("CategoryHeadChannel")
+  Message            Message[]
+  ChannelPermissions ChannelPermissions[]
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  text      String    @db.VarChar(8096)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  deletedAt DateTime?
+
+  // FKs
+  channelId String  @map("channel_id")
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Replies
+  repliesToId String?   @map("replies_to_id")
+  repliesTo   Message?  @relation("Replies", fields: [repliesToId], references: [id], onUpdate: NoAction, onDelete: SetNull)
+  replies     Message[] @relation("Replies")
+
+  // Relations
+  Reaction   Reaction[]
+  UserPing   UserPing[]
+  RolePing   RolePing[]
+  Attachment Attachment[]
+}
+
+model Role {
+  id                String  @id @default(cuid())
+  name              String  @unique @db.VarChar(64)
+  canModifyRoles    Boolean @default(false)
+  canCreateChannels Boolean @default(false)
+  canKickUsers      Boolean @default(false)
+  canTimeout        Boolean @default(false)
+
+  // FKs
+  serverId String @map("server_id")
+  server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  // Relations
+  RoleAssign         RoleAssign[]
+  ChannelPermissions ChannelPermissions[]
+  RolePing           RolePing[]
+}
+
+// Supporting
+model RoleAssign {
+  // Foreign Keys as composite primary key
+  userId String @map("user_id")
+  roleId String @map("role_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model ChannelPermissions {
+  id        String  @id @default(cuid())
+  channelId String  @map("channel_id")
+  roleId    String  @map("role_id")
+  channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  role      Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+}
+
+model Reaction {
+  id        String  @id @default(cuid())
+  emoji     String
+  messageId String  @map("message_id")
+  userId    String  @map("user_id")
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, userId, emoji])
+}
+
+model UserPing {
+  // Foreign Keys as composite primary key
+  userId    String  @map("user_id")
+  messageId String  @map("message_id")
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@id([userId, messageId])
+}
+
+model RolePing {
+  // FKs as composite primary key
+  roleId    String  @map("role_id")
+  messageId String  @map("message_id")
+  role      Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, messageId])
+}
+
+model Attachment {
+  id       String @id @default(cuid())
+  url      String @db.VarChar(2000)
+  fileName String @map("file_name") @db.VarChar(255)
+  mimeType String @map("mime_type") @db.VarChar(64)
+  size     Int
+
+  // FKs
+  messageId String  @map("message_id")
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model Timeout {
+  timeoutUntil DateTime @map("timeout_until")
+  description  String?  @db.VarChar(1000)
+
+  // FKs
+  userId   String @map("user_id")
+  serverId String @map("server_id")
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  server   Server @relation(fields: [serverId], references: [id], onDelete: Cascade)
+
+  @@id([userId, serverId])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique @db.VarChar(255)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  device    String?  @db.VarChar(255)
+
+  // FKs
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
