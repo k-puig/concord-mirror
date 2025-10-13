@@ -28,6 +28,16 @@
     },
     "db:deploy": {
       "cache": false
+    },
+    "db:seed": {
+      "cache": false
+    },
+    "db:push": {
+      "cache": false
+    },
+    "db:studio": {
+      "cache": false,
+      "persistent": true
     }
   }
 }

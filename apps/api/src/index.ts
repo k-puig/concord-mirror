@@ -24,7 +24,7 @@ const usersRoute = app.get('/users', async (c) => {
   return c.json(users);
 });
 
-const port = Number.parseInt(process.env.PORT || '3000');
+const port = Number.parseInt(process.env.PORT || '3000', 10);
 console.log(`API server listening on port ${port}`);
 
 // This exports the type of our app's routes,

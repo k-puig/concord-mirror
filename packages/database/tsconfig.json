@@ -1,5 +1,5 @@
 {
   "extends": "@concord/tsconfig/base.json",
-  "include": ["."]
+  "include": ["."],
   "exclude": ["generated"]
 }
