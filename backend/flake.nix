@@ -12,6 +12,7 @@
           buildInputs = with pkgs; [
             jdk25
             gradle
+            keycloak
           ];
         shellHook = ''
           mkdir -p .vscode
