@@ -55,7 +55,7 @@ public class ServerController {
         @ApiResponse(responseCode = "400", description = "Invalid request")
     })
     @PostMapping("/")
-    public ResponseEntity<PostServerResponse> postMethodName(@Valid @RequestBody PostServerRequest request) {
+    public ResponseEntity<PostServerResponse> createNewServer(@Valid @RequestBody PostServerRequest request) {
         try {
             var response = serverService.createServer(request);
             return ResponseEntity.ok(response);
