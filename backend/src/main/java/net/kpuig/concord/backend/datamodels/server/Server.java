@@ -1,4 +1,4 @@
-package net.kpuig.concord.backend.datamodels;
+package net.kpuig.concord.backend.datamodels.server;
 
 import java.net.URL;
 

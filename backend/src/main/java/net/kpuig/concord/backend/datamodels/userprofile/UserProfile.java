@@ -1,4 +1,4 @@
-package net.kpuig.concord.backend.datamodels;
+package net.kpuig.concord.backend.datamodels.userprofile;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
