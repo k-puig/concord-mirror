@@ -9,6 +9,7 @@ import net.kpuig.shoebill.backend.datamodels.userprofile.PostUserProfileResponse
 import net.kpuig.shoebill.backend.datamodels.userprofile.UserProfile;
 import net.kpuig.shoebill.backend.repositories.UserProfileRepository;
 import net.kpuig.shoebill.backend.services.exceptions.BadRequestException;
+import net.kpuig.shoebill.backend.services.exceptions.NotFoundException;
 
 @Service
 public class UserProfileService {
@@ -32,7 +33,7 @@ public class UserProfileService {
             response.setId(userProfile.getId());
             response.setUsername(userProfile.getUsername());
         }, () -> {
-            throw new net.kpuig.shoebill.backend.services.exceptions.NotFoundException("User profile not found");
+            throw new NotFoundException("User profile not found");
         });
         return response;
     }
@@ -43,7 +44,7 @@ public class UserProfileService {
             response.setId(userProfile.getId());
             response.setUsername(userProfile.getUsername());
         }, () -> {
-            throw new net.kpuig.shoebill.backend.services.exceptions.NotFoundException("User profile not found");
+            throw new NotFoundException("User profile not found");
         });
         return response;
     }
